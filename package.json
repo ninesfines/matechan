@@ -1,0 +1,22 @@
+{
+  "name": "matechan",
+  "version": "1.0.0",
+  "description": "matechan discord bot",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "matechan"
+  ],
+  "author": "ninesfines",
+  "license": "ISC",
+  "dependencies": {
+    "@chris-kode/myanimelist-api-v2": "^1.0.8",
+    "axios": "^0.26.0",
+    "discord.js": "^13.6.0",
+    "dotenv": "^16.0.0",
+    "mongoose": "^6.2.3",
+    "node-fetch": "^2.6.7"
+  }
+}
