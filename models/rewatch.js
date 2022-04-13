@@ -6,13 +6,13 @@ class Rewatch {
     animeId;
     animeTitle;
     animePicture;
-    //users;
+    users;
 
     constructor(animeId, code){
         this.animeId = animeId;
         if(code != null)
             this.code = code;
-        //this.users = [];
+        this.users = [];
     }
 
     getDescription(){

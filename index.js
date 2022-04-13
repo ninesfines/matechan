@@ -46,22 +46,58 @@ client.on('messageCreate', async (msg) => {
       });
       break;
     case "addrewatch":
-      const animeId = args[0];
-      const rewatchCode = args[1];
+      var animeId = args[0];
+      var rewatchCode = args[1];
       if(animeId === null || isNaN(animeId)) 
         msg.channel.send('Ingresar ID de MAL');
       else {
-        const rewatch = await rewatchManager.createRewatch(animeId, rewatchCode);
-        msg.channel.send('Creado: ' + rewatch);
+          await rewatchManager.createRewatch(animeId, rewatchCode)
+          .then(res => {
+            console.log('Creado: ' + res);
+            msg.channel.send('Creado: ' + res);
+          })
+          .catch(err => {
+            //console.log(result.saveResult);
+            console.log(err);
+            if(err.code === 11000)
+              msg.channel.send(process.env.DUPLICATE_REWATCH_CODE_ERROR);
+            else  
+              msg.channel.send(process.env.GENERAL_REWATCH_ERROR);
+          });
+          //console.log(result.saveResult);
+          // .catch(error => {
+          //   console.log(error)
+          //   if(error.name === 'Duplicate')
+          //     console.log('Duplicate')
+          // });
+          // if(result.saveResult === 'Success')
+          //   msg.channel.send('Creado: ' + result.rewatch);
+        // } catch(e) {
+        //   if(result.saveResult === 'Duplicate')
+        //     msg.channel.send('Código de rewatch repetido');
+        //   else 
+        //     msg.channel.send('Hubo un problema al crear el rewatch, ¡intentalo de vuelta más tarde!');
+        // }
+        // if(result.saveResult === 'Success')
+        //   msg.channel.send('Creado: ' + result.rewatch);
+        // else if(result.saveResult === 'Duplicate')
+        //   msg.channel.send('Código de rewatch repetido');
+        // else 
+        //   msg.channel.send('Hubo un problema al crear el rewatch, ¡intentalo de vuelta más tarde!');
       }
       break;
     case "listrewatches":
-      const rewatchCodes = await rewatchManager.loadRewatchCodes();
+      var rewatchCodes = await rewatchManager.loadRewatchCodes();
       console.log(rewatchCodes);
       rewatchCodes.forEach(rewatch => {
         msg.channel.send(rewatch.code + ' | ' + rewatch.animeTitle);
       });
-      
+      break;
+    case "adduser":
+      var rewatchCode = args[1];
+      console.log(rewatchCode);
+      var userId = msg.mentions.users.first().id;
+      await rewatchManager.addUser(rewatchCode, userId);
       break;
    }
 });
@@ -79,6 +115,7 @@ async function getAnime(id){
 mongoose.connect(process.env.MONGODB_SRV, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
+  autoIndex: true
 }).then(() => {
   console.log('Connected to the database!')
 }).catch((err) => {
