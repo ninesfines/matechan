@@ -52,38 +52,17 @@ client.on('messageCreate', async (msg) => {
         msg.channel.send('Ingresar ID de MAL');
       else {
           await rewatchManager.createRewatch(animeId, rewatchCode)
-          .then(res => {
-            console.log('Creado: ' + res);
-            msg.channel.send('Creado: ' + res);
+          .then(rewatch => {
+            console.log('Creado: ' + rewatch);
+            msg.channel.send('Creado: ' + rewatch);
           })
           .catch(err => {
-            //console.log(result.saveResult);
             console.log(err);
             if(err.code === 11000)
               msg.channel.send(process.env.DUPLICATE_REWATCH_CODE_ERROR);
             else  
               msg.channel.send(process.env.GENERAL_REWATCH_ERROR);
           });
-          //console.log(result.saveResult);
-          // .catch(error => {
-          //   console.log(error)
-          //   if(error.name === 'Duplicate')
-          //     console.log('Duplicate')
-          // });
-          // if(result.saveResult === 'Success')
-          //   msg.channel.send('Creado: ' + result.rewatch);
-        // } catch(e) {
-        //   if(result.saveResult === 'Duplicate')
-        //     msg.channel.send('Código de rewatch repetido');
-        //   else 
-        //     msg.channel.send('Hubo un problema al crear el rewatch, ¡intentalo de vuelta más tarde!');
-        // }
-        // if(result.saveResult === 'Success')
-        //   msg.channel.send('Creado: ' + result.rewatch);
-        // else if(result.saveResult === 'Duplicate')
-        //   msg.channel.send('Código de rewatch repetido');
-        // else 
-        //   msg.channel.send('Hubo un problema al crear el rewatch, ¡intentalo de vuelta más tarde!');
       }
       break;
     case "listrewatches":

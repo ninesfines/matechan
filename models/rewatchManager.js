@@ -19,12 +19,10 @@ class RewatchManager {
         rewatch.animePicture = anime.main_picture.large;
         //this.rewatchList.push(rewatch);
         await this.saveRewatch(rewatch);
-        //console.log('Save result: ' + saveResult)
         return rewatch;
     }
 
     async saveRewatch(rewatch){
-      var saveResult;  
       const rewatchMD = new RewatchMD({
         _id: mongoose.Types.ObjectId(),
         code: rewatch.code,
@@ -34,21 +32,6 @@ class RewatchManager {
         animePicture: rewatch.animePicture
       });
       await rewatchMD.save();
-        // .then(result => {
-        //   //console.log('Success: ' + result);
-        //   return 'Success';
-        // })
-        // .catch(err => {
-        //   console.log('Error: ' + err); 
-        //   if(err.name === 'MongoServerError' && err.code === 11000){
-        //     console.log('Error duplicado');
-        //     throw new Error('Duplicate');
-        //     //return 'Duplicate';
-        //   }else
-        //     return 'Error'
-        // });
-      //console.log('Result: ' + saveResult);
-      //return saveResult
     }
 
     async loadRewatchCodes(){
