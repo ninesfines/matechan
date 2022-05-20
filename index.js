@@ -20,13 +20,13 @@ client.once('ready', () => console.log('Ready!'));
 
 client.on('messageCreate', async (msg) => {
 
-  if (!msg.content.startsWith('+')) return; // If the message doesn't start with the prefix return
+  if (!msg.content.startsWith(process.env.COMMAND_PREFIX)) return; // If the message doesn't start with the prefix return
 
   const args = msg.content.slice(1).split(' '); // Split all spaces so you can get the command out of the message
   const cmd = args.shift().toLowerCase(); // Get the commands name
   
   switch (cmd) {
-    case "vivo?":
+    case "vivo?": case "vivo":
       msg.reply("sobreviviendo");
       break;
     //our meme command below
@@ -49,7 +49,9 @@ client.on('messageCreate', async (msg) => {
       var animeId = args[0];
       var rewatchCode = args[1];
       if(animeId === null || isNaN(animeId)) 
-        msg.channel.send('Ingresar ID de MAL');
+        msg.channel.send(process.env.ADDREWATCH_PARAMETER_MAL_ID);
+      if(typeof rewatchCode != 'string' || rewatchCode.length < process.env.REWATCH_CODE_MIN_LENGTH)
+        msg.channel.send(process.env.ADDREWATCH_PARAMETER_CODE_REWATCH);
       else {
           await rewatchManager.createRewatch(animeId, rewatchCode)
           .then(rewatch => {
@@ -57,9 +59,15 @@ client.on('messageCreate', async (msg) => {
             msg.channel.send('Creado: ' + rewatch);
           })
           .catch(err => {
-            console.log(err);
-            if(err.code === 11000)
+            console.error(err);
+            console.log(typeof err.code);
+            console.log(typeof err.response);
+            if(typeof err.code != 'undefined' && err.code === 11000)
               msg.channel.send(process.env.DUPLICATE_REWATCH_CODE_ERROR);
+            else if(typeof err.response != 'undefined' 
+                && typeof err.response.status != 'undefined' 
+                && err.response.status === 404)
+              msg.channel.send(process.env.MAL_ID_NOT_FOUND_ERROR);
             else  
               msg.channel.send(process.env.GENERAL_REWATCH_ERROR);
           });
@@ -74,22 +82,35 @@ client.on('messageCreate', async (msg) => {
       break;
     case "adduser":
       var rewatchCode = args[1];
-      console.log(rewatchCode);
       var userId = msg.mentions.users.first().id;
-      await rewatchManager.addUser(rewatchCode, userId);
+      if(typeof rewatchCode != 'string'  
+        || rewatchCode.length < process.env.REWATCH_CODE_MIN_LENGTH
+        || userId === null) 
+        msg.channel.send(process.env.ADDUSER_INVALID_PARAMETERS);
+      await rewatchManager.addUser(rewatchCode, userId)
+        .then(result => {
+          msg.channel.send(process.env.ADDREWATCH_USER_ADDED);
+        })
+        .catch(err => {
+          if(err.message === 'user_already_on_rewatch')
+            msg.channel.send(process.env.ADDREWATCH_USER_ALREADY_ON_REWATCH);
+        });
+      break;
+
+    case "test":
+      //msg.channel.send("test");
+      await rewatchManager.getRandomCharacter(160)
+      .then(character => {
+        console.log('Character is: ' + character.name);
+        msg.channel.send(character.name + '\n' + character.images.jpg.image_url);
+      })
+      .catch(err => {
+        console.error(err);
+      })
+      
       break;
    }
 });
-
-async function getAnime(id){
-  const url = 'https://api.myanimelist.net/v2/anime/' + id;
-  console.log('URL es:' + url);
-  res = await axios.get(url, {headers: {
-    'X-MAL-CLIENT-ID': (process.env.MAL_CLIENT_ID)
-  }});
-  console.log(res.data);
-  return res.data;
-}
 
 mongoose.connect(process.env.MONGODB_SRV, {
   useNewUrlParser: true,
