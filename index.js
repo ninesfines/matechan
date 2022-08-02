@@ -6,6 +6,11 @@ const RewatchManager = require('./models/rewatchManager.js');
 const RewatchMD = require('./models/rewatchSchema.js');
 const fetch = require('node-fetch');
 const API = require("@chris-kode/myanimelist-api-v2");
+const openAiManager = require('./models/openAiManager.js');
+const DeepLManager = require('./models/deepLManager');
+const deepLManager = require('./models/deepLManager');
+//const { translator } = require('./models/deepLManager');
+const  translator = require('./models/translator');
 require('dotenv').config(); //initialize dotenv
 
 
@@ -88,8 +93,8 @@ client.on('messageCreate', async (msg) => {
         || userId === null) 
         msg.channel.send(process.env.ADDUSER_INVALID_PARAMETERS);
       await rewatchManager.addUser(rewatchCode, userId)
-        .then(result => {
-          msg.channel.send(process.env.ADDREWATCH_USER_ADDED);
+        .then(user => {
+          msg.channel.send(process.env.ADDREWATCH_USER_ADDED + '\n' + user.characterPicture);
         })
         .catch(err => {
           if(err.message === 'user_already_on_rewatch')
@@ -99,15 +104,28 @@ client.on('messageCreate', async (msg) => {
 
     case "test":
       //msg.channel.send("test");
-      await rewatchManager.getRandomCharacter(160)
-      .then(character => {
-        console.log('Character is: ' + character.name);
-        msg.channel.send(character.name + '\n' + character.images.jpg.image_url);
-      })
-      .catch(err => {
-        console.error(err);
-      })
+      //await rewatchManager.getRandomCharacter(160)
+      // await rewatchManager.getRewatchAnime('somali-rewatch')
+      // .then(anime => {
+      //   console.log('Anime is: ' + anime);
+      //   //console.log('Character is: ' + character.name);
+      //   //msg.channel.send(character.name + '\n' + character.images.jpg.image_url);
+      // })
+      // .catch(err => {
+      //   console.error(err);
+      // })
       
+      prompt = args.join(' ');
+      console.log(prompt);
+      const translatedPrompt = await translator.translate(prompt, 'en', 'es');
+      const openAiResponse = await openAiManager.requestCompletion(translatedPrompt);
+      const translatedResponse = await translator.translate(openAiResponse, 'es', 'en');
+      console.log(translatedResponse);
+
+      //await openAiManager.requestCompletion('Hello how are you?');
+
+      //await translator.translateEnglishToSpanish('hello!');
+
       break;
    }
 });

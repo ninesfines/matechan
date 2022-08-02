@@ -51,17 +51,20 @@ class RewatchManager {
       }
       else{
         console.log('User is not on the rewatch');
-        const userIdStruct = {userId: userId};
+        anime = await this.getRewatchAnime(rewatchCode);
+        character = await this.getRandomCharacter(anime.animeId);
+        const userIdStruct = {
+          userId: userId,
+          characterName: character.name,
+          characterPicture: character.images.jpg.image_url
+        };
         await rewatchModel.findOneAndUpdate({"code": rewatchCode}, { $push: { users: userIdStruct}});
+        return userIdStruct;
       }
     }
 
     async getRewatchUsers(rewatchCode){
       const rewatchModel = mongoose.model("rewatchmodels", RewatchMD.rewatchSchema);
-      // const usersIds = await rewatchModel.aggregate([
-      //   {$unwind: "$users"},
-      //   {$match: {code: rewatchCode}}
-      // ]);
       const rewatch = await rewatchModel
         .find({ code: rewatchCode })
         .select({"animeTitle": 1, "users": 1});
@@ -88,8 +91,16 @@ class RewatchManager {
       return userIsOnRewatch;
     }
 
+    async getRewatchAnime(rewatchCode){
+      const rewatchModel = mongoose.model("rewatchmodels", RewatchMD.rewatchSchema);
+      const anime = await rewatchModel
+        .find({ code: rewatchCode })
+        .select({"animeId": 1, "animeTitle": 1, "animePicture": 1});
+      return anime[0];
+    }
+
     async test(){
-      await this.getCharacter(160);
+      //await this.getCharacter(160);
     }
 }
 

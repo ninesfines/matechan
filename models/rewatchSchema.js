@@ -2,7 +2,9 @@ const mongoose = require('mongoose');
 
 const user = new mongoose.Schema({
     _id: mongoose.Types.ObjectId,
-    userId: {type: String}
+    userId: {type: String},
+    characterName: {type: String},
+    characterPicture: {type: String}
 })
 
 const rewatchSchema = new mongoose.Schema({
